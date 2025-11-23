@@ -1,37 +1,109 @@
 <!DOCTYPE html>
 <html>
- <head>
-    <meta charset="UTF-8">
-    <title>NIGHTFALL PLATFORM - L'Odyssee du NEXUS</title> 
-        body {
-            background-color: black;
-            color:white:
-            font-family: Arial, sans-serif:
-            text-align: center;
-            padding: 20px 
-        }
-        h1 {
-            color: #8a2be2;
-        }
-        .game-box {
-            border: 3px solid #8a2be2;
-            padding: 20px;
-            margin-top: 30px;
-            border-radius: 10px;
-        }
-    </style>
+<head>
+<meta charset="UTF-8">
+<title>Nightfall Platform</title>
+
+<style>
+    body {
+        margin: 0;
+        background: black;
+    }
+
+    canvas {
+        display: block;
+        margin: auto;
+        background: #111;
+        border: 3px solid #8a2be2;
+    }
+</style>
 </head>
+
 <body>
 
-  <h1>NIGHTFALL PLATFORM - L'Odyssee du  NEXUS</h1>
+<canvas id="game" width="800" height="450"></canvas>
 
-  <p>Bienvenue dans le jeu que j'ai cree !</p>
+<script>
+// --- JEU PLATFORMER SIMPLE ---
 
-  <div class="game-box">
-      <p>  *Ici sera ajoute plus tard :* le vrai jeu jouable !</p>
-      <p>pour l'instant cette page presente le projet.</p>
-  </div>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+// Joueur
+let player = {
+    x: 100,
+    y: 300,
+    w: 40,
+    h: 40,
+    xSpeed: 0,
+    ySpeed: 0,
+    jump: false
+};
+
+// Contrôles
+let keys = {};
+
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+// Gravité
+const gravity = 0.5;
+
+// Plateforme
+let ground = {
+    x: 0,
+    y: 400,
+    w: 800,
+    h: 50
+};
+
+function update() {
+    // Déplacements gauche/droite
+    if (keys["ArrowRight"]) player.xSpeed = 4;
+    else if (keys["ArrowLeft"]) player.xSpeed = -4;
+    else player.xSpeed = 0;
+
+    // Saut
+    if (keys[" "] || keys["ArrowUp"]) {
+        if (!player.jump) {
+            player.ySpeed = -10;
+            player.jump = true;
+        }
+    }
+
+    // Gravité + mouvement
+    player.ySpeed += gravity;
+    player.x += player.xSpeed;
+    player.y += player.ySpeed;
+
+    // Collision sol
+    if (player.y + player.h > ground.y) {
+        player.y = ground.y - player.h;
+        player.ySpeed = 0;
+        player.jump = false;
+    }
+}
+
+function draw() {
+    ctx.clearRect(0, 0, 800, 450);
+
+    // Sol
+    ctx.fillStyle = "#444";
+    ctx.fillRect(ground.x, ground.y, ground.w, ground.h);
+
+    // Joueur
+    ctx.fillStyle = "#8a2be2";
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+}
+
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
 
 </body>
-</html> 
-      
+</html>
