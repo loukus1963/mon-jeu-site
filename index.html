@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Nightfall Platform</title>
+<title>Mon jeu plateforme</title>
 
 <style>
     body {
@@ -12,98 +12,130 @@
 
     canvas {
         display: block;
-        margin: auto;
-        background: #111;
-        border: 3px solid #8a2be2;
+        background: #222;
+        margin: 0 auto;
     }
 </style>
-</head>
 
+</head>
 <body>
 
-<canvas id="game" width="800" height="450"></canvas>
+<canvas id="jeu" width="800" height="400"></canvas>
 
 <script>
-// --- JEU PLATFORMER SIMPLE ---
+    const canvas = document.getElementById("jeu");
+    const ctx = canvas.getContext("2d");
 
+    // Joueur
+    let joueur = {
+        x: 50,
+        y: 300,
+        largeur: 40,
+        hauteur: 40,
+        vitesseY: 0,
+        saute: false
+    };
+
+    // Gravité
+    const gravite = 1;
+
+    // Contrôles
+    let touches = {};
+
+    document.addEventListener("keydown", e => touches[e.key] = true);
+    document.addEventListener("keyup", e => touches[e.key] = false);
+
+    function jeuBoucle() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Déplacement gauche/droite
+        if (touches["ArrowLeft"]) joueur.x -= 5;
+        if (touches["ArrowRight"]) joueur.x += 5;
+
+        // Saut
+        if (touches[" "] && !joueur.saute) {
+            joueur.vitesseY = -15;
+            joueur.saute = true;
+        }
+
+        // Gravité
+        joueur.y += joueur.vitesseY;
+        joueur.vitesseY += gravite;
+
+        // Sol
+        if (joueur.y > 300) {
+            joueur.y = 300;
+            joueur.vitesseY = 0;
+            joueur.saute = false;
+        }
+
+        // Dessine le joueur
+        ctx.fillStyle = "purple";
+        ctx.fillRect(joueur.x, joueur.y, joueur.largeur, joueur.hauteur);
+
+        requestAnimationFrame(jeuBoucle);
+    }
+
+    jeuBoucle();
+</script>
+<canvas id="game"></canvas>
+
+<script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+canvas.width = 800;
+canvas.height = 450;
+
 // Joueur
 let player = {
-    x: 100,
-    y: 300,
-    w: 40,
-    h: 40,
-    xSpeed: 0,
-    ySpeed: 0,
+    x: 50,
+    y: 350,
+    width: 30,
+    height: 30,
+    color: "purple",
+    velY: 0,
     jump: false
 };
 
-// Contrôles
-let keys = {};
-
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
-
 // Gravité
-const gravity = 0.5;
+const gravity = 1;
 
-// Plateforme
-let ground = {
-    x: 0,
-    y: 400,
-    w: 800,
-    h: 50
-};
-
-function update() {
-    // Déplacements gauche/droite
-    if (keys["ArrowRight"]) player.xSpeed = 4;
-    else if (keys["ArrowLeft"]) player.xSpeed = -4;
-    else player.xSpeed = 0;
-
-    // Saut
-    if (keys[" "] || keys["ArrowUp"]) {
-        if (!player.jump) {
-            player.ySpeed = -10;
-            player.jump = true;
-        }
-    }
-
-    // Gravité + mouvement
-    player.ySpeed += gravity;
-    player.x += player.xSpeed;
-    player.y += player.ySpeed;
-
-    // Collision sol
-    if (player.y + player.h > ground.y) {
-        player.y = ground.y - player.h;
-        player.ySpeed = 0;
-        player.jump = false;
-    }
-}
-
-function draw() {
-    ctx.clearRect(0, 0, 800, 450);
-
-    // Sol
-    ctx.fillStyle = "#444";
-    ctx.fillRect(ground.x, ground.y, ground.w, ground.h);
-
-    // Joueur
-    ctx.fillStyle = "#8a2be2";
-    ctx.fillRect(player.x, player.y, player.w, player.h);
-}
+// Sol
+const groundHeight = 80;
 
 function gameLoop() {
-    update();
-    draw();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Sol gris
+    ctx.fillStyle = "gray";
+    ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
+
+    // Player
+    player.velY += gravity;
+    player.y += player.velY;
+
+    // Collision sol
+    if (player.y + player.height >= canvas.height - groundHeight) {
+        player.y = canvas.height - groundHeight - player.height;
+        player.jump = false;
+    }
+
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+
     requestAnimationFrame(gameLoop);
 }
 
+// Saut
+window.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && !player.jump) {
+        player.velY = -20;
+        player.jump = true;
+    }
+});
+
 gameLoop();
 </script>
-
 </body>
 </html>
